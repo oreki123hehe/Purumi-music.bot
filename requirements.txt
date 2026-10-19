@@ -1,5 +1,4 @@
-pyrogram==2.0.106
-py-tgcalls==2.2.12
-TgCrypto==1.2.5
+kurigram[fast]==2.2.26
+basiccalls==2.2.9.2
 yt-dlp>=2025.9.26
 Flask>=3.1,<4
