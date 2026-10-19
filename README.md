@@ -1,18 +1,19 @@
 # Purumi Music Bot
 
-Telegram group voice-chat music bot using a Telegram bot account for commands and a separate assistant user account for voice chat. Python + Pyrogram + PyTgCalls + yt-dlp + Flask health endpoints.
+Telegram group voice-chat music bot using a Telegram bot account for commands and a separate assistant user account for voice chat. Python + Kurigram + BasicCalls (PyTgCalls-compatible fork) + yt-dlp + Flask health endpoints.
 
 ## Features
 
 - Search public YouTube results by title with `/play <song title>`.
 - Stream audio into a group voice chat through the assistant account.
 - Queue, now-playing, pause, resume, skip and stop commands.
-- `/` and `/healthz` HTTP endpoints for hosting health checks.
+- Music commands only: `/play`, `/queue`, `/now`, `/pause`, `/resume`, `/skip`, `/stop`, and `/help`.
+- `/` and `/healthz` HTTP endpoints are retained for hosting health checks; they are not Telegram music commands.
 - Environment-based secrets; no tokens are stored in source files.
 
 ## Important limits
 
-This repository has been scaffolded for deployment but has **not been verified against your Telegram account, target group, or Faable runtime yet**. Telegram voice-chat APIs and PyTgCalls versions can change. Deploy first, inspect logs, then test in a private group.
+This repository has been scaffolded for deployment but has **not been verified against your Telegram account, target group, or Faable runtime yet**. It now uses Kurigram with BasicCalls, a community fork advertising Kurigram compatibility; test the actual voice-chat connection before relying on it. Deploy first, inspect logs, then test in a private group.
 
 The assistant account must already be a member of the target group. Start the group's voice chat manually first. If Telegram requires the assistant to have permission to speak/manage the call, grant the required permissions. Do not use an account you cannot afford to lose; Telegram may restrict accounts that automate activity excessively.
 
@@ -28,7 +29,7 @@ Search results and audio availability are controlled by YouTube and the uploader
 
 Do this on your own computer or Termux, **not in a public GitHub workflow**. Never commit a session string.
 
-Install Python 3.12 and project dependencies, then set `API_ID` and `API_HASH` in your local shell. Run:
+Install Python 3.12 and project dependencies (Kurigram + BasicCalls), then set `API_ID` and `API_HASH` in your local shell. Run:
 
 ```bash
 python -m pip install -r requirements.txt
@@ -81,7 +82,6 @@ Faable's free plan has its own resource and runtime limits. A healthy HTTP endpo
 | `/resume` | Resume playback |
 | `/skip` | Skip current track |
 | `/stop` | Stop playback and clear queue |
-| `/ping` | Check controller status |
 
 ## Troubleshooting
 
@@ -90,7 +90,7 @@ Faable's free plan has its own resource and runtime limits. A healthy HTTP endpo
 - **Bot commands are ignored:** check bot token, ensure the bot is in the group, and use `/help@YourBotUsername` if command routing conflicts.
 - **Assistant does not join/play:** start the voice chat first, check membership/permissions and inspect Faable logs.
 - **Search fails:** yt-dlp may need an update or YouTube may block the hosting IP. Re-deploy after updating dependencies; do not upload account cookies publicly.
-- **Build fails around PyTgCalls/ntgcalls:** inspect the build log. If a compatible prebuilt wheel is unavailable for the selected Python/runtime, this free managed buildpack may not be able to install it; Docker builds require a Faable plan that supports Docker.
+- **Build fails around BasicCalls/ntgcalls:** inspect the build log. If a compatible prebuilt wheel is unavailable for the selected Python/runtime, this free managed buildpack may not be able to install it; Docker builds require a Faable plan that supports Docker.
 - **Queue does not auto-advance:** check logs for update events from the installed PyTgCalls version. This behavior needs a live voice-chat test; if the event type differs in the installed release, the callback may need a compatibility adjustment.
 
 ## Local run
