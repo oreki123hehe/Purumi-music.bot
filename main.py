@@ -6,15 +6,18 @@ import asyncio
 import json
 import logging
 import os
-import subprocess
 import threading
 import time
 from collections import defaultdict, deque
 from typing import Any
 
 from flask import Flask, jsonify
-from pyrogram import Client, filters, idle
-from pyrogram.errors import RPCError
+try:
+    from kurigram import Client, filters, idle
+except ImportError:
+    # Kurigram may expose the Pyrogram-compatible module namespace.
+    from pyrogram import Client, filters, idle
+
 from pytgcalls import PyTgCalls
 from pytgcalls.types import MediaStream
 
@@ -206,10 +209,6 @@ async def enqueue_query(message, query: str):
         await send_text(message, f"➕ Ditambahkan ke antrean #{len(queues[chat_id])}: **{track['title']}**")
 
 
-def command_filters():
-    return filters.group & filters.command
-
-
 async def bot_main():
     global bot_client, calls, bot_loop
     require_config()
@@ -246,7 +245,6 @@ async def bot_main():
             "/resume — lanjutkan audio\n"
             "/skip — lewati lagu\n"
             "/stop — hentikan audio dan kosongkan antrean\n"
-            "/ping — periksa status bot\n\n"
             "Assistant harus sudah masuk ke grup dan voice chat harus aktif."
         ))
 
@@ -321,10 +319,6 @@ async def bot_main():
             log.info("leave_call on stop: %s", exc)
         runtime_status["voice_chats"][str(chat_id)] = "stopped"
         await send_text(message, "⏹️ Audio dihentikan dan antrean dikosongkan.")
-
-    @bot_client.on_message(filters.command("ping") & filters.group)
-    async def ping_cmd(_, message):
-        await send_text(message, f"🏓 Purumi aktif. Controller: {'online' if runtime_status['bot'] else 'offline'}; assistant: {'online' if runtime_status['assistant'] else 'offline'}.")
 
     try:
         await bot_client.start()
