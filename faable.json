@@ -1,0 +1,4 @@
+{
+  "buildpack": "python",
+  "startCommand": "python main.py"
+}
