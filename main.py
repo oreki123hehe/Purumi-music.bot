@@ -162,24 +162,22 @@ async def play_track(chat_id: int, track: dict):
 async def play_next(chat_id: int, message=None):
     lock = queue_locks.setdefault(chat_id, asyncio.Lock())
     async with lock:
-        if not queues[chat_id]:
-            current_tracks[chat_id] = None
-            runtime_status["voice_chats"][str(chat_id)] = "idle"
-            if message:
-                await send_text(message, "Antrean habis. Tambahkan lagu dengan /play judul lagu.")
-            return
-        track = queues[chat_id].popleft()
-        try:
-            await play_track(chat_id, track)
-            if message:
-                await send_text(message, f"▶️ Memutar: **{track['title']}** ({fmt_duration(track['duration'])})")
-        except Exception as exc:
-            log.exception("Failed to start stream")
-            runtime_status["last_error"] = str(exc)
-            if message:
-                await send_text(message, f"Gagal memutar **{track['title']}**. Mencoba lagu berikutnya…")
-            if queues[chat_id]:
-                await play_next(chat_id, message)
+        while queues[chat_id]:
+            track = queues[chat_id].popleft()
+            try:
+                await play_track(chat_id, track)
+                if message:
+                    await send_text(message, f"▶️ Memutar: **{track['title']}** ({fmt_duration(track['duration'])})")
+                return
+            except Exception as exc:
+                log.exception("Failed to start stream")
+                runtime_status["last_error"] = str(exc)
+                if message:
+                    await send_text(message, f"Gagal memutar **{track['title']}**. Mencoba lagu berikutnya…")
+        current_tracks[chat_id] = None
+        runtime_status["voice_chats"][str(chat_id)] = "idle"
+        if message:
+            await send_text(message, "Antrean habis. Tambahkan lagu dengan /play judul lagu.")
 
 
 async def enqueue_query(message, query: str):
@@ -339,7 +337,7 @@ async def bot_main():
         runtime_status["last_error"] = None
         log.info("Purumi is ready. Controller and assistant connected.")
 
-        # Auto-advance queue when PyTgCalls reports that a stream ended.
+        # Register stream-ended callback before waiting for the process to stop.
         @calls.on_update()
         async def on_call_update(_, update):
             if type(update).__name__ == "StreamEnded":
