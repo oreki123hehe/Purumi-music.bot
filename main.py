@@ -12,11 +12,7 @@ from collections import defaultdict, deque
 from typing import Any
 
 from flask import Flask, jsonify
-try:
-    from kurigram import Client, filters, idle
-except ImportError:
-    # Kurigram may expose the Pyrogram-compatible module namespace.
-    from pyrogram import Client, filters, idle
+from kurigram import Client, filters, idle
 
 from pytgcalls import PyTgCalls
 from pytgcalls.types import MediaStream
