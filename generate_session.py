@@ -1,7 +1,10 @@
 """Generate the assistant account session string locally. Never run this on a public host."""
 import asyncio
 import os
-from pyrogram import Client
+try:
+    from kurigram import Client
+except ImportError:
+    from pyrogram import Client
 
 
 async def main():
